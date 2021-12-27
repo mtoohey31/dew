@@ -1,14 +1,14 @@
-name: Lint, test, and build server
+name: Lint, test, and build backend
 on:
   push:
     branches: ["**"]
-    paths: ["server"]
+    paths: ["backend"]
 jobs:
   build_test:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: server
+        working-directory: backend
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2

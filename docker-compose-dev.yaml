@@ -27,15 +27,15 @@ services:
     networks:
       - proxy
     depends_on:
-      - server
+      - backend
 
-  server:
-    image: dew-server
+  backend:
+    image: dew-backend
     build:
-      context: server
+      context: backend
       dockerfile: Dockerfile-dev
     volumes:
-      - ./server:/go/src/dew-server
+      - ./backend:/go/src/dew-backend
     networks:
       - proxy
       - db

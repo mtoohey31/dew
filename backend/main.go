@@ -12,5 +12,5 @@ func main() {
 }
 
 func helloWorld(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "hello world from dew-server")
+	fmt.Fprintln(w, "hello world from dew-backend")
 }
