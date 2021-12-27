@@ -1,0 +1,9 @@
+FROM node:16
+
+WORKDIR /usr/src/dew-web
+
+RUN npm install -g pnpm
+
+EXPOSE 3000
+ENV HOST=0.0.0.0
+ENTRYPOINT ["/bin/sh", "-c", "pnpm install && exec pnpm run dev -- --host"]

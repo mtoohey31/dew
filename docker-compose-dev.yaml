@@ -1,0 +1,57 @@
+version: "3.9"
+
+services:
+  proxy:
+    image: caddy:latest
+    ports:
+      - 80:80
+      - 3000:80
+    environment:
+      API_ROUTE: ${API_ROUTE}
+    volumes:
+      - ./Caddyfile-dev:/etc/caddy/Caddyfile
+    networks:
+      - proxy
+    depends_on:
+      - web
+
+  web:
+    image: dew-web
+    build:
+      context: web
+      dockerfile: Dockerfile-dev
+    environment:
+      VITE_API_URL: http://localhost:3000${API_ROUTE}
+    volumes:
+      - ./web:/usr/src/dew-web
+    networks:
+      - proxy
+    depends_on:
+      - server
+
+  server:
+    image: dew-server
+    build:
+      context: server
+      dockerfile: Dockerfile-dev
+    volumes:
+      - ./server:/go/src/dew-server
+    networks:
+      - proxy
+      - db
+    depends_on:
+      - db
+
+  db:
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    ports:
+      - 27017:27017
+    networks:
+      - db
+
+networks:
+  proxy:
+  db:

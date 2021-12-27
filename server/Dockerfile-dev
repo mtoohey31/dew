@@ -1,0 +1,9 @@
+FROM golang:1.17.5
+
+ENV GOPATH /go
+WORKDIR /go/src/dew-server
+
+RUN go install github.com/mitranim/gow@latest
+
+EXPOSE 8080/tcp
+ENTRYPOINT ["gow", "run", "."]
