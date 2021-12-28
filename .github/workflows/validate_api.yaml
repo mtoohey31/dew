@@ -1,0 +1,20 @@
+name: Validate API
+on:
+  push:
+    branches: ["**"]
+    paths: ["docs/api"]
+jobs:
+  build_test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: docs/api
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v2.0.1
+        with:
+          version: latest
+          run_install: true
+      - name: Validate API
+        run: pnpm run validate

@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "validate": "openapi-generator-cli validate -i dew-v0.1.0.yaml"
+  },
+  "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^2.4.22"
+  }
+}

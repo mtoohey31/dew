@@ -1,0 +1,165 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/schemas/v3.0/schema.json
+openapi: 3.0.3
+
+info:
+  version: 0.1.0
+  title: Dew API
+servers:
+  - url: /backend/v1
+
+paths:
+  /users:
+    post:
+      summary: Creates a new user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewUser"
+      responses:
+        200:
+          description: The user was successfully created if the username was not taken, the request responded to in the same amount of time regardless
+    delete:
+      summary: Deletes the current user
+      responses:
+        200:
+          description: The user was deleted
+    patch:
+      summary: Updates various properties of a user
+      responses:
+        200:
+          description: The provided properties were updated
+  /users/tasks: # is there any way to verify when a task is shared/unshared?
+    post: # we'll have to handle re-invitations client side because the server won't know if there is any difference
+      summary: Adds a shared task to the current user
+      requestBody:
+        description: The encrypted task id, read key, and optional write key object
+        content:
+          text/plain:
+            schema:
+              type: string
+      responses:
+        200:
+          description: The task was successfully added
+  /users/tasks/{oid}:
+    delete:
+      summary: Removes a shared task
+      parameters:
+        - name: oid
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Oid"
+      responses:
+        200:
+          description: The shared task was successfully removed
+  /tasks/{id}:
+    get:
+      summary: Fetch the specified task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/TaskId"
+      responses:
+        200:
+          description: The task was found, the body contains the encrypted task data
+          content:
+            text/plain:
+              schema:
+                type: string
+        404:
+          description: The task does not exist, or you do not have access
+    post:
+      summary: Creates a new child task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/TaskId"
+      responses:
+        200:
+          description: The child task was successfully created
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/TaskId"
+    put:
+      summary: Updates the specified task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/TaskId"
+      responses:
+        200:
+          description: The task was successfully updated
+        404:
+          description: The task does not exist, or you do not have access
+    delete:
+      summary: Deletes a task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/TaskId"
+      responses:
+        200:
+          description: The task was successfully deleted
+        404:
+          description: The task does not exist, or you do not have access
+  /share/{username}:
+    get:
+      summary: Request the public share key belonging to the specified user
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Username"
+      responses:
+        200:
+          description: If the user exists, the response contains their public share key, if they do not, it contains a share key for a ghost user that does not exist, but will prevent the recipient from determining whether they exist, both operations should take the same amount of time
+    post:
+      summary: Share a task with the specified user, note that this allows the server to identify who is sharing with whom
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Username"
+      requestBody:
+        description: The encrypted share request data
+        content:
+          text/plain:
+            schema:
+              type: string
+      responses:
+        200:
+          description: If the user exists, the task has been shared, the operation should take the same amount of time regardless of whether the user exists
+components:
+  schemas:
+    Username:
+      type: string
+    NewUser:
+      type: object
+      required:
+        - username
+        - passwordHash
+      properties:
+        username:
+          $ref: "#/components/schemas/Username"
+        passwordHash:
+          type: string
+    Oid:
+      type: string
+      minLength: 24
+      maxLength: 24
+    TaskId:
+      type: string
+      minLength: 32
+      maxLength: 32
