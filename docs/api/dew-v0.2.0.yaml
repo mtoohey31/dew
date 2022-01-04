@@ -1,0 +1,328 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/schemas/v3.0/schema.json
+# TODO: add specifications of hashing and public/private key pair algorithms, salts, iterations, etc.
+openapi: 3.0.3
+
+info:
+  version: 0.2.0
+  title: Dew API
+servers:
+  - url: /backend/v1
+
+paths:
+  /users:
+    post:
+      summary: Creates a new user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewUser"
+      responses:
+        200:
+          description: The user was successfully created if the username was not taken # the request should be responded to in the same amount of time regardless
+    delete:
+      summary: Deletes the current user
+      security:
+        - UserAuth: []
+      responses:
+        200:
+          description: The current user was deleted
+    patch:
+      summary: Updates various properties of a user
+      security:
+        - UserAuth: []
+      responses:
+        200:
+          description: The provided properties were updated
+  /users/tasks: # is there any way to verify when a task is shared/unshared?
+    post: # we'll have to handle re-invitations client side because the server won't know if there is any difference
+      summary: Adds a shared task to the current user
+      security:
+        - UserAuth: []
+      requestBody:
+        description: The encrypted task id, read key, and optional write key object
+        content:
+          text/plain:
+            schema:
+              type: string
+      responses:
+        200:
+          description: The task was successfully added
+  /users/tasks/{id}:
+    delete:
+      summary: Removes a shared task
+      security:
+        - UserAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Id"
+      responses:
+        200:
+          description: The shared task was successfully removed
+  /tasks/{id}:
+    get:
+      summary: Fetch the specified task
+      security:
+        - ReadKeyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Id"
+      responses:
+        200:
+          description: The task was found, the body contains the encrypted task data
+          content:
+            text/plain:
+              schema:
+                type: string
+        404:
+          description: The task does not exist, or you do not have access
+    post:
+      summary: Creates a new child task
+      security:
+        - WriteKeyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Id"
+      responses:
+        200:
+          description: The child task was successfully created
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/Id"
+        404:
+          description: The task does not exist, or you do not have access
+    put:
+      summary: Updates the specified task
+      security:
+        - WriteKeyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Id"
+      responses:
+        200:
+          description: The task was successfully updated
+        404:
+          description: The task does not exist, or you do not have access
+    delete:
+      summary: Deletes a task
+      security:
+        - AdminKeyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Id"
+      responses:
+        200:
+          description: The task was successfully deleted
+        404:
+          description: The task does not exist, or you do not have access
+  /tasks/{id}/share/read:
+    post:
+      summary: Adds an encrypted username and hashed key to the task permissions
+      security:
+        - AdminkeyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Id"
+      requestBody:
+        description: The encrypted username and partially hashed key pair
+        content:
+          text/plain:
+            schema:
+              type: string
+      responses:
+        200:
+          description: The task permissions were successfully modified
+        404:
+          description: The task does not exist, or you do not have access
+  /tasks/{taskId}/share/read/{shareId}:
+    delete:
+      summary: Removes a user's read access from the task permissions
+      security:
+        - AdminkeyAuth: []
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Id"
+        - name: shareId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Id"
+      responses:
+        200:
+          description: The task permissions were successfully modified
+        404:
+          description: The task does not exist, or you do not have access
+  /tasks/{id}/share/write:
+    post:
+      summary: Adds an encrypted username and public key to the task permissions
+      security:
+        - AdminkeyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Id"
+      requestBody:
+        description: The encrypted username and public key pair
+        content:
+          text/plain:
+            schema:
+              type: string
+      responses:
+        200:
+          description: The task permissions were successfully modified
+        404:
+          description: The task does not exist, or you do not have access
+  /tasks/{taskId}/share/write/{shareId}:
+    delete:
+      summary: Removes a user's write access from the task permissions
+      security:
+        - AdminkeyAuth: []
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Id"
+        - name: shareId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Id"
+      responses:
+        200:
+          description: The task permissions were successfully modified
+        404:
+          description: The task does not exist, or you do not have access
+  /tasks/{id}/share/admin:
+    post:
+      summary: Adds an encrypted username and public key to the task permissions
+      security:
+        - AdminkeyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Id"
+      requestBody:
+        description: The encrypted username and public key pair
+        content:
+          text/plain:
+            schema:
+              type: string
+      responses:
+        200:
+          description: The task permissions were successfully modified
+        404:
+          description: The task does not exist, or you do not have access
+  /tasks/{taskId}/share/admin/{shareId}:
+    delete:
+      summary: Removes a user's admin access from the task permissions
+      security:
+        - AdminkeyAuth: []
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Id"
+        - name: shareId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Id"
+      responses:
+        200:
+          description: The task permissions were successfully modified
+        404:
+          description: The task does not exist, or you do not have access
+  /share/{username}:
+    get:
+      summary: Request the public share key belonging to the specified user
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Username"
+      responses:
+        200:
+          description: If the user exists, the response contains their public share key, if they do not, it contains a share key for a ghost user that does not exist # this will prevent the recipient from determining whether they exist, both operations should take the same amount of time
+    post:
+      summary: Share a task with the specified user, note that this allows the server to identify who is sharing with whom
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Username"
+      requestBody:
+        description: The encrypted share request data
+        content:
+          text/plain:
+            schema:
+              type: string
+      responses:
+        200:
+          description: If the user exists, the task has been shared # the operation should take the same amount of time regardless of whether the user exists
+
+components:
+  schemas:
+    Username:
+      type: string
+    NewUser:
+      type: object
+      required:
+        - username
+        - passwordHash
+      properties:
+        username:
+          $ref: "#/components/schemas/Username"
+        passwordHash:
+          type: string
+    Id:
+      type: string
+      minLength: 32
+      maxLength: 32
+
+  securitySchemes:
+    UserAuth: # should be updated in the future to use nonces to avoid replay attacks
+      description: Used with username:passwordHash pairs
+      type: http
+      scheme: basic
+    ReadKeyAuth:
+      description: Used when reading tasks
+      type: http
+      scheme: signature
+    WriteKeyAuth:
+      description: Used when updating tasks
+      type: http
+      scheme: signature
+    AdminKeyAuth:
+      description: Used when sharing tasks
+      type: http
+      scheme: signature
