@@ -2,9 +2,9 @@ name: Lint, test, and build web
 on:
   push:
     branches: ["**"]
-    paths: ["web"]
+    paths: ["web/**"]
 jobs:
-  build_test:
+  lint_test_build:
     runs-on: ubuntu-latest
     defaults:
       run:

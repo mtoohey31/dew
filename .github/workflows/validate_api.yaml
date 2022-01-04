@@ -2,9 +2,9 @@ name: Validate API
 on:
   push:
     branches: ["**"]
-    paths: ["docs/api"]
+    paths: ["docs/api/**"]
 jobs:
-  build_test:
+  validate:
     runs-on: ubuntu-latest
     defaults:
       run:

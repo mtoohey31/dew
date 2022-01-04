@@ -2,9 +2,9 @@ name: Lint, test, and build backend
 on:
   push:
     branches: ["**"]
-    paths: ["backend"]
+    paths: ["backend/**"]
 jobs:
-  build_test:
+  lint_test_build:
     runs-on: ubuntu-latest
     defaults:
       run:

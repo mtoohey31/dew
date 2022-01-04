@@ -2,9 +2,9 @@ name: Lint, test, and build mobile
 on:
   push:
     branches: ["**"]
-    paths: ["mobile"]
+    paths: ["mobile/**"]
 jobs:
-  build_test:
+  lint_test_build:
     runs-on: macos-latest
     defaults:
       run:
