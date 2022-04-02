@@ -1,4 +1,4 @@
-FROM golang:1.17.5 AS build
+FROM golang:1.18 AS build
 
 ENV GOPATH /go
 WORKDIR /go/src/dew-backend
